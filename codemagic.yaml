@@ -1,15 +1,23 @@
 workflows:
   ios-workflow:
-    name: Build unsigned iOS IPA
-    max_build_duration: 60
+    name: Build Unsigned IPA
     environment:
       flutter: stable
       xcode: latest
       cocoapods: default
     scripts:
-      - name: Install Flutter dependencies
-        script: flutter pub get
-      - name: Build unsigned IPA
-        script: flutter build ipa --release --no-codesign
+      # الخطوة 1: تأكد من تكوين iOS وتثبيت تبعيات Flutter
+      - name: Setup Flutter & iOS
+        script: |
+          flutter doctor
+          flutter pub get
+          cd ios
+          pod install
+          cd ..
+
+      # الخطوة 2: بناء IPA بدون توقيع
+      - name: Build Unsigned IPA
+        script: |
+          flutter build ipa --release --no-codesign
     artifacts:
       - build/ios/ipa/*.ipa
