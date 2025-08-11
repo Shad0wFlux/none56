@@ -10,14 +10,11 @@ workflows:
 
       - name: Fix Flutter theme API changes
         script: |
-          # تعديل CardTheme
           sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
-          # تعديل TabBarTheme
           sed -i '' 's/TabBarTheme(/TabBarThemeData(/g' lib/theme/app_theme.dart
 
       - name: Build iOS app without code signing
-        script: |
-          flutter build ios --release --no-codesign
+        script: flutter build ios --release --no-codesign
 
       - name: Create IPA from .app
         script: |
@@ -26,9 +23,34 @@ workflows:
           zip -r app.ipa Payload
           rm -rf Payload
 
-    artifacts:
-      - app.ipa
-    publishing:
-      email:
-        recipients:
-          - you@example.com
+      - name: Upload IPA to GitHub repo
+        script: |
+          GITHUB_TOKEN="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"
+          git config --global user.email "kydt1234@gmail.com"
+          git config --global user.name "Shad0wFlux"
+
+          if git clone --branch ipa-artifacts https://$GITHUB_TOKEN@github.com/Shad0wFlux/none56.git ipa-artifacts; then
+            echo "Branch ipa-artifacts cloned."
+          else
+            echo "Branch ipa-artifacts not found, cloning default branch and creating ipa-artifacts branch."
+            git clone https://$GITHUB_TOKEN@github.com/Shad0wFlux/none56.git ipa-artifacts
+            cd ipa-artifacts
+            git checkout -b ipa-artifacts
+            cd ..
+          fi
+
+          cd ipa-artifacts
+
+          cp ../app.ipa .
+
+          git add app.ipa
+          git commit -m "Add IPA from build $CM_BUILD_ID" || echo "No changes to commit"
+          git push https://$GITHUB_TOKEN@github.com/Shad0wFlux/none56.git ipa-artifacts
+
+artifacts:
+  - app.ipa
+
+publishing:
+  email:
+    recipients:
+      - kydt1234@gmail.com
