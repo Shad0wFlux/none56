@@ -23,37 +23,28 @@ workflows:
           zip -r app.ipa Payload
           rm -rf Payload
 
-      - name: Upload IPA to GitHub repo
+      - name: Upload IPA to GitHub Release
         script: |
+          GITHUB_REPO="Shad0wFlux/none56"
+          RELEASE_TAG="build-$(date +%Y%m%d%H%M%S)"
+          RELEASE_NAME="Build $RELEASE_TAG"
+          IPA_FILE="app.ipa"
           GITHUB_TOKEN="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"
-          git config --global user.email "kydt1234@gmail.com"
-          git config --global user.name "Shad0wFlux"
-          git config --global credential.helper store
 
-          if git clone --branch ipa-artifacts https://$GITHUB_TOKEN@github.com/Shad0wFlux/none56.git ipa-artifacts; then
-            echo "Branch ipa-artifacts cloned."
-          else
-            echo "Branch ipa-artifacts not found, cloning default branch and creating ipa-artifacts branch."
-            git clone https://$GITHUB_TOKEN@github.com/Shad0wFlux/none56.git ipa-artifacts
-            cd ipa-artifacts
-            git checkout -b ipa-artifacts
-            cd ..
-          fi
+          response=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+            -d "{\"tag_name\":\"$RELEASE_TAG\", \"name\":\"$RELEASE_NAME\", \"body\":\"Automated build release.\", \"draft\":false, \"prerelease\":false}" \
+            "https://api.github.com/repos/$GITHUB_REPO/releases")
 
-          cd ipa-artifacts
+          upload_url=$(echo $response | python3 -c "import sys, json; print(json.load(sys.stdin)['upload_url'].split('{')[0])")
 
-          cp ../app.ipa .
+          curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
+            -H "Content-Type: application/zip" \
+            --data-binary @"$IPA_FILE" \
+            "$upload_url?name=$IPA_FILE"
 
-          git add app.ipa
-          git commit -m "Add IPA from build $CM_BUILD_ID" || echo "No changes to commit"
-
-          git remote set-url origin https://$GITHUB_TOKEN@github.com/Shad0wFlux/none56.git
-          git push origin ipa-artifacts
-
-artifacts:
-  - app.ipa
-
-publishing:
-  email:
-    recipients:
-      - kydt1234@gmail.com
+    artifacts:
+      - app.ipa
+    publishing:
+      email:
+        recipients:
+          - kydt1234@gmail.com
