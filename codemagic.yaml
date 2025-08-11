@@ -35,8 +35,3 @@ workflows:
 
     artifacts:
       - flutter_app/app_unsigned.ipa
-
-    publishing:
-      email:
-        recipients:
-          - ${{ inputs.EMAIL_RECIPIENT }}
