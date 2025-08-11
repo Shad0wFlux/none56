@@ -1,40 +1,27 @@
-‏workflows:
-‏  ios-unsigned-build:
-‏    name: iOS Unsigned Build
-‏    instance_type: mac_mini_m1
-‏    environment:
-‏      flutter: stable
-‏      xcode: latest
-‏      cocoapods: latest
-‏    triggering:
-‏      events:
-‏        - push
-‏      branch_patterns:
-‏        - pattern: master
-‏          include: true
-‏    scripts:
-‏      - name: Set up keychain
-‏        script: |
-‏          # No keychain setup needed for unsigned build
-‏          echo "No keychain setup needed for unsigned build"
-‏      - name: Get Flutter packages
-‏        script: |
-‏          flutter pub get
-‏      - name: Install CocoaPods
-‏        script: |
-‏          cd ios
-‏          pod install
-‏      - name: Flutter build iOS
-‏        script: |
-‏          flutter build ios --no-codesign
-‏    artifacts:
-‏      - build/ios/ipa/*.ipa
-‏      - /tmp/xcodebuild_logs/*.log
-‏      - $CM_BUILD_DIR/app/build/ios/outputs/bundle/*.app
-‏    publishing:
-‏      email:
-‏        recipients:
-‏          - kydt1234@gmail.com # Replace with actual recipient
-‏        success: true
-‏        failure: false
+workflows:
+  build-ios-unsigned:
+    name: Build iOS (Unsigned IPA)
+    environment:
+      flutter: stable
+      xcode: latest
+    scripts:
+      - name: Install dependencies
+        script: flutter pub get
 
+      - name: Build iOS app without code signing
+        script: |
+          flutter build ios --release --no-codesign
+
+      - name: Create IPA from .app
+        script: |
+          mkdir -p Payload
+          cp -R build/ios/iphoneos/*.app Payload/
+          zip -r app.ipa Payload
+          rm -rf Payload
+
+    artifacts:
+      - app.ipa
+    publishing:
+      email:
+        recipients:
+          - kydt1234@gmail.com
