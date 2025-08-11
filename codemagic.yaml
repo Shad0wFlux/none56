@@ -1,36 +1,72 @@
 workflows:
-  build-ios-unsigned:
-    name: Build iOS (Unsigned IPA)
+  react-native-ios-unsigned:
+    name: Build React Native iOS (Unsigned IPA)
     environment:
-      flutter: stable
+      # تحديد إصدار Node.js و npm
+      node: 18.x
+      # تحديد إصدار Xcode. يمكن استخدام 'latest' أو إصدار محدد مثل '15.x'
       xcode: latest
+      # تحديد إصدار CocoaPods
+      cocoapods: latest
+
     scripts:
-      - name: Install dependencies
-        script: flutter pub get
-
-      - name: Fix Flutter theme API changes
+      - name: Install Node.js dependencies
         script: |
-          # تعديل CardTheme
-          sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
-          # تعديل TabBarTheme
-          sed -i '' 's/TabBarTheme(/TabBarThemeData(/g' lib/theme/app_theme.dart
-          # تعديل DialogTheme
-          sed -i '' 's/DialogTheme(/DialogThemeData(/g' lib/theme/app_theme.dart
+          # الانتقال إلى مجلد المشروع الرئيسي
+          cd $CM_BUILD_DIR
+          # تثبيت تبعيات npm
+          npm install
 
-      - name: Build iOS app without code signing
+      - name: Install CocoaPods dependencies
         script: |
-          flutter build ios --release --no-codesign
+          # الانتقال إلى مجلد iOS داخل المشروع
+          cd $CM_BUILD_DIR/ios
+          # تثبيت CocoaPods
+          pod install
 
-      - name: Create IPA from .app
+      - name: Build iOS app (Unsigned)
         script: |
+          # الانتقال إلى مجلد iOS داخل المشروع
+          cd $CM_BUILD_DIR/ios
+          # بناء مشروع Xcode. 
+          # -workspace: اسم ملف .xcworkspace الخاص بمشروع React Native
+          # -scheme: اسم الـ scheme الخاص بالتطبيق (عادةً نفس اسم المشروع)
+          # -configuration: تحديد نوع البناء (Release)
+          # -sdk: تحديد SDK المستهدف (iphoneos لأجهزة iOS الحقيقية)
+          # CODE_SIGNING_REQUIRED=NO: لتعطيل التوقيع البرمجي
+          # CODE_SIGN_IDENTITY="": لعدم استخدام أي هوية توقيع
+          # -derivedDataPath: لتحديد مسار ملفات البناء المؤقتة
+          xcodebuild build \
+            -workspace InstagramLoginApp.xcworkspace \
+            -scheme InstagramLoginApp \
+            -configuration Release \
+            -sdk iphoneos \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            -derivedDataPath $CM_BUILD_DIR/build/ios
+
+      - name: Create Unsigned IPA
+        script: |
+          # تحديد مسار ملف .app الذي تم بناؤه
+          APP_PATH="$CM_BUILD_DIR/build/ios/Build/Products/Release-iphoneos/InstagramLoginApp.app"
+          # إنشاء مجلد Payload
           mkdir -p Payload
-          cp -R build/ios/iphoneos/*.app Payload/
-          zip -r app.ipa Payload
+          # نسخ ملف .app إلى مجلد Payload
+          cp -R "$APP_PATH" Payload/
+          # ضغط مجلد Payload لإنشاء ملف IPA
+          zip -r InstagramLoginApp_unsigned.ipa Payload
+          # حذف مجلد Payload المؤقت
           rm -rf Payload
 
     artifacts:
-      - app.ipa
+      # تحديد ملف IPA الناتج كـ artifact ليتم حفظه
+      - InstagramLoginApp_unsigned.ipa
+
     publishing:
+      # إعدادات إرسال البريد الإلكتروني عند اكتمال البناء
       email:
         recipients:
-          - you@example.com
+          - you@example.com # استبدل هذا ببريدك الإلكتروني
+        success: true
+        failure: true
+
