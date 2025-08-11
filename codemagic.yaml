@@ -13,13 +13,13 @@ workflows:
     scripts:
       - name: Get Flutter dependencies
         script: |
-          cd $CM_BUILD_DIR
+          cd $CM_BUILD_DIR/flutter_app
           flutter clean
           flutter pub get
 
       - name: Build iOS app (Unsigned)
         script: |
-          cd $CM_BUILD_DIR
+          cd $CM_BUILD_DIR/flutter_app
           flutter build ios --release --no-codesign
           mkdir -p Payload
           cp -R build/ios/iphoneos/*.app Payload/
@@ -29,7 +29,7 @@ workflows:
           rm -rf Payload
 
     artifacts:
-      - app_unsigned.ipa
+      - flutter_app/app_unsigned.ipa
 
     publishing:
       email:
