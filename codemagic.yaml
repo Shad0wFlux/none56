@@ -2,38 +2,26 @@ workflows:
   react-native-ios-unsigned:
     name: Build React Native iOS (Unsigned IPA)
     environment:
-      # تحديد إصدار Node.js و npm
-      node: 18.x
-      # تحديد إصدار Xcode. يمكن استخدام 'latest' أو إصدار محدد مثل '15.x'
-      xcode: latest
-
+      # إزالة تحديد نسخ Node.js و Xcode للاعتماد على بيئة Codemagic الافتراضية
+      # node: 18.x     <-- تم الحذف
+      # xcode: latest  <-- تم الحذف
 
     scripts:
       - name: Install Node.js dependencies
         script: |
-          # الانتقال إلى مجلد المشروع الرئيسي
           cd $CM_BUILD_DIR
-          # تثبيت تبعيات npm
           npm install
 
       - name: Install CocoaPods dependencies
         script: |
-          # الانتقال إلى مجلد iOS داخل المشروع
           cd $CM_BUILD_DIR/ios
+          pod repo update
           pod install
 
       - name: Build iOS app (Unsigned)
         script: |
-          # الانتقال إلى مجلد iOS داخل المشروع
           cd $CM_BUILD_DIR/ios
-          # بناء مشروع Xcode. 
-          # -workspace: اسم ملف .xcworkspace الخاص بمشروع React Native
-          # -scheme: اسم الـ scheme الخاص بالتطبيق (عادةً نفس اسم المشروع)
-          # -configuration: تحديد نوع البناء (Release)
-          # -sdk: تحديد SDK المستهدف (iphoneos لأجهزة iOS الحقيقية)
-          # CODE_SIGNING_REQUIRED=NO: لتعطيل التوقيع البرمجي
-          # CODE_SIGN_IDENTITY="": لعدم استخدام أي هوية توقيع
-          # -derivedDataPath: لتحديد مسار ملفات البناء المؤقتة
+          xcodebuild clean -workspace InstagramLoginApp.xcworkspace -scheme InstagramLoginApp -configuration Release
           xcodebuild build \
             -workspace InstagramLoginApp.xcworkspace \
             -scheme InstagramLoginApp \
@@ -45,25 +33,16 @@ workflows:
 
       - name: Create Unsigned IPA
         script: |
-          # تحديد مسار ملف .app الذي تم بناؤه
           APP_PATH="$CM_BUILD_DIR/build/ios/Build/Products/Release-iphoneos/InstagramLoginApp.app"
-          # إنشاء مجلد Payload
           mkdir -p Payload
-          # نسخ ملف .app إلى مجلد Payload
           cp -R "$APP_PATH" Payload/
-          # ضغط مجلد Payload لإنشاء ملف IPA
           zip -r InstagramLoginApp_unsigned.ipa Payload
-          # حذف مجلد Payload المؤقت
           rm -rf Payload
 
     artifacts:
-      # تحديد ملف IPA الناتج كـ artifact ليتم حفظه
       - InstagramLoginApp_unsigned.ipa
 
     publishing:
-      # إعدادات إرسال البريد الإلكتروني عند اكتمال البناء
       email:
         recipients:
-          - you@example.com # استبدل هذا ببريدك الإلكتروني
-
-
+          - you@example.com
