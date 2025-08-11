@@ -4,9 +4,9 @@ workflows:
     environment:
       flutter: 3.19.6
       xcode: latest
-      coapods : 1.11.2
+      cocoapods: 1.11.2
     trigger:
-      events: 
+      events:
         - push
       branch_patterns:
         - pattern: master
@@ -15,8 +15,8 @@ workflows:
       - name: Install Flutter
         script: |
           flutter pub get
-      - name: Build iOS App:
-        script: |
+      - name: "Build iOS App"
+        scrept: {|
           flutter build ios --release --no-codesign
     artifacts:
       - build/ios/ipa/*.ipa
@@ -28,3 +28,4 @@ workflows:
         notify:
           success: true
           failure: true
+
