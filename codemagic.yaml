@@ -1,57 +1,27 @@
 workflows:
-  ios_unsigned_build:
-    name: iOS Unsigned IPA
+  ios-unsigned-build:
+    name: 'iOS Unsigned Build'
+    # استخدم جهاز macOS M2 للبناء. يمكنك تغييره إلى mac_pro إذا لزم الأمر.
+    instance_type: mac_mini_m2
     environment:
-      flutter: "3.19.5"
-      xcode: "15.2"
-      cocoapods: "1.15.2"
-
+      # استخدم أحدث إصدار مستقر من Flutter.
+      flutter: stable
+      # استخدم أحدث إصدار من Xcode.
+      xcode: latest
     scripts:
-      - name: Verify Environment
+      - name: Get Flutter packages
         script: |
-          flutter doctor -v
-          which pod
-          pod --version
-
-      - name: Clean & Setup
-        script: |
-          flutter clean
           flutter pub get
-          rm -rf ios/Pods ios/Podfile.lock
-
-      - name: iOS Preparation
+      - name: Install CocoaPods dependencies
         script: |
+          # انتقل إلى مجلد ios وقم بتثبيت الـ Pods.
           cd ios
-          pod repo update
-          pod install --verbose
-          cd ..
-          chmod -R 755 ios/
-
-      - name: Build Unsigned IPA
+          pod install
+      - name: Build unsigned IPA
         script: |
-          flutter build ipa \
-            --release \
-            --no-codesign \
-            --dart-define=CODESIGNING_DISABLED=true \
-            --verbose
-
-      - name: Verify Artifacts
-        script: |
-          if ls build/ios/ipa/*.ipa 1> /dev/null 2>&1; then
-            echo "✅ IPA generated successfully"
-            ls -lh build/ios/ipa/
-          else
-            echo "❌ IPA file not found!"
-            exit 1
-          fi
-
+          # قم ببناء التطبيق في وضع الإصدار (release) وبدون توقيع رقمي.
+          flutter build ipa --release --no-codesign
     artifacts:
+      # حدد مسار ملف IPA الناتج ليكون متاحًا للتحميل.
       - build/ios/ipa/*.ipa
-      - ios/Runner.xcarchive/**/*
-      - ios/Flutter/flutter_export_environment.sh
 
-    cache:
-      cache_paths:
-        - ~/.pub-cache
-        - ios/Pods
-        - ios/.symlinks
