@@ -29,7 +29,7 @@ workflows:
           RELEASE_TAG="build-$(date +%Y%m%d%H%M%S)"
           RELEASE_NAME="Build $RELEASE_TAG"
           IPA_FILE="app.ipa"
-          GITHUB_TOKEN="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"
+          GITHUB_TOKEN="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"
 
           response=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
             -d "{\"tag_name\":\"$RELEASE_TAG\", \"name\":\"$RELEASE_NAME\", \"body\":\"Automated build release.\", \"draft\":false, \"prerelease\":false}" \
@@ -47,4 +47,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - kydt1234@gmail.com
+          - you@example.com
