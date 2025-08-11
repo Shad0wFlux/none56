@@ -1,23 +1,73 @@
+# codemagic.yaml - Flutter iOS Unsigned Build
 workflows:
-  ios-workflow:
-    name: Build Unsigned IPA
+  ios_unsigned_build:
+    name: iOS Unsigned IPA
+    description: "Build unsigned IPA for manual signing"
     environment:
-      flutter: stable
-      xcode: latest
-      cocoapods: default
-    scripts:
-      # الخطوة 1: تأكد من تكوين iOS وتثبيت تبعيات Flutter
-      - name: Setup Flutter & iOS
-        script: |
-          flutter doctor
-          flutter pub get
-          cd ios
-          pod install
-          cd ..
+      # الإصدارات الموصى بها (تعديلها حسب مشروعك)
+      flutter: "3.19.5"  
+      xcode: "15.2"
+      cocoapods: "1.15.2"
 
-      # الخطوة 2: بناء IPA بدون توقيع
-      - name: Build Unsigned IPA
+    # تعطيل التوقيع التلقائي
+    ios_signing:
+      distribution_type: none
+
+    scripts:
+      # الخطوة 1: التحقق من البيئة
+      - name: Verify Environment
         script: |
-          flutter build ipa --release --no-codesign
+          flutter doctor -v
+          which pod
+          pod --version
+
+      # الخطوة 2: تنظيف وإعداد المشروع
+      - name: Clean & Setup
+        script: |
+          flutter clean
+          flutter pub get
+          rm -rf ios/Pods ios/Podfile.lock
+
+      # الخطوة 3: إعداد iOS
+      - name: iOS Preparation
+        script: |
+          cd ios
+          pod repo update
+          pod install --verbose
+          cd ..
+          # إصلاح أذونات الملفات
+          chmod -R 755 ios/
+
+      # الخطوة 4: البناء مع سجلات مفصلة
+      - name: Build IPA (Unsigned)
+        script: |
+          flutter build ipa \
+            --release \
+            --no-codesign \
+            --dart-define=CODESIGNING_DISABLED=true \
+            --verbose
+
+      # الخطوة 5: التحقق من الملف الناتج
+      - name: Verify Artifacts
+        script: |
+          if ls build/ios/ipa/*.ipa 1> /dev/null 2>&1; then
+            echo "✅ IPA generated successfully"
+            ls -lh build/ios/ipa/
+          else
+            echo "❌ IPA file not found!"
+            exit 1
+          fi
+
     artifacts:
       - build/ios/ipa/*.ipa
+      - ios/Runner.xcarchive/**/*  # مهم للتوقيع لاحقاً
+      - ios/Flutter/flutter_export_environment.sh
+
+    publishing:
+      scripts:
+        - name: Prepare for Manual Signing
+          script: |
+            echo "Download these files for manual signing:"
+            echo "1. .ipa file"
+            echo "2. .xcarchive folder"
+            echo "3. ExportOptions.plist (create if missing)"
