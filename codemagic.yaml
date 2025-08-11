@@ -2,18 +2,21 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     environment:
-      flutter: 3.19.6 # تحديد إصدار Flutter محدد
+      flutter: 3.19.6
       xcode: latest
       cocoapods: 1.11.2
+    trigger:
+      events:
+        - push
+      branch_patterns:
+        - pattern: master
+          include: true
     scripts:
-      - name: Update CocoaPods
-        script: |
-          gem install cocoapods -v 1.11.2
       - name: Install Flutter
-        script: | 
+        script: |
           flutter pub get
       - name: Build iOS App
-        script: | 
+        script: |
           flutter build ios --release --no-codesign
     artifacts:
       - build/ios/ipa/*.ipa
@@ -22,7 +25,7 @@ workflows:
       email:
         recipients:
           - your_email@example.com
-        notify: 
+        notify:
           success: true
           failure: true
 
