@@ -1,5 +1,5 @@
 workflows:
-  build_ios_ipa:
+  ios-workflow:
     name: Build unsigned iOS IPA
     max_build_duration: 60
     environment:
