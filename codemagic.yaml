@@ -39,4 +39,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.comص
+          - ${{ inputs.EMAIL_RECIPIENT }}
