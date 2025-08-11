@@ -1,45 +1,31 @@
 workflows:
-  react-native-ios-unsigned:
-    name: Build React Native iOS (Unsigned IPA)
-    environment: {}
-
+  flutter-ios-build:
+    name: Build Flutter iOS (Unsigned IPA)
+    max_build_duration: 60
+    environment:
+      flutter: stable
+      xcode: latest
+      cocoapods: default
+      vars:
+        LC_ALL: en_US.UTF-8
+        LANG: en_US.UTF-8
     scripts:
-      - name: Install Node.js dependencies
+      - name: Get Flutter dependencies
         script: |
-          cd $CM_BUILD_DIR
-          npm install
-
-      - name: Install CocoaPods dependencies
-        script: |
-          cd $CM_BUILD_DIR/ios
-          pod repo update
-          pod install
-
+          flutter clean
+          flutter pub get
       - name: Build iOS app (Unsigned)
         script: |
-          cd $CM_BUILD_DIR/ios
-          xcodebuild clean -workspace InstagramLoginApp.xcworkspace -scheme InstagramLoginApp -configuration Release
-          xcodebuild build \
-            -workspace InstagramLoginApp.xcworkspace \
-            -scheme InstagramLoginApp \
-            -configuration Release \
-            -sdk iphoneos \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            -derivedDataPath $CM_BUILD_DIR/build/ios
-
-      - name: Create Unsigned IPA
-        script: |
-          APP_PATH="$CM_BUILD_DIR/build/ios/Build/Products/Release-iphoneos/InstagramLoginApp.app"
+          flutter build ios --release --no-codesign
           mkdir -p Payload
-          cp -R "$APP_PATH" Payload/
-          zip -r InstagramLoginApp_unsigned.ipa Payload
+          cp -R build/ios/iphoneos/*.app Payload/
+          cd Payload
+          zip -r ../app_unsigned.ipa ./
+          cd ..
           rm -rf Payload
-
     artifacts:
-      - InstagramLoginApp_unsigned.ipa
-
+      - app_unsigned.ipa
     publishing:
       email:
         recipients:
-          - you@example.com
+          - your-email@example.com
