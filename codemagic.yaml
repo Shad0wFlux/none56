@@ -1,10 +1,7 @@
 workflows:
   react-native-ios-unsigned:
     name: Build React Native iOS (Unsigned IPA)
-    environment:
-      # إزالة تحديد نسخ Node.js و Xcode للاعتماد على بيئة Codemagic الافتراضية
-      # node: 18.x     <-- تم الحذف
-      # xcode: latest  <-- تم الحذف
+    environment: {}
 
     scripts:
       - name: Install Node.js dependencies
