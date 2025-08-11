@@ -4,8 +4,11 @@ workflows:
     environment:
       flutter: latest
       xcode: latest
-      cocoapods: latest
+      cocoapods: 1.11.2 # تحديد إصدار معين
     scripts:
+      - name: Update CocoaPods
+        script: |
+          gem install cocoapods -v 1.11.2
       - name: Install Flutter
         script: | 
           flutter pub get
