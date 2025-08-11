@@ -7,21 +7,18 @@ workflows:
       cocoapods: "1.15.2"
 
     scripts:
-      # الخطوة 1: التحقق من البيئة
       - name: Verify Environment
         script: |
           flutter doctor -v
           which pod
           pod --version
 
-      # الخطوة 2: تنظيف وإعداد المشروع
       - name: Clean & Setup
         script: |
           flutter clean
           flutter pub get
           rm -rf ios/Pods ios/Podfile.lock
 
-      # الخطوة 3: إعداد iOS
       - name: iOS Preparation
         script: |
           cd ios
@@ -30,7 +27,6 @@ workflows:
           cd ..
           chmod -R 755 ios/
 
-      # الخطوة 4: البناء بدون توقيع
       - name: Build Unsigned IPA
         script: |
           flutter build ipa \
@@ -39,7 +35,6 @@ workflows:
             --dart-define=CODESIGNING_DISABLED=true \
             --verbose
 
-      # الخطوة 5: التحقق من الملف الناتج
       - name: Verify Artifacts
         script: |
           if ls build/ios/ipa/*.ipa 1> /dev/null 2>&1; then
