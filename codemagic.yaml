@@ -1,15 +1,22 @@
-workflows:
-  ios-workflow:
-    name: Build unsigned iOS IPA
-    max_build_duration: 60
-    environment:
-      flutter: stable
-      xcode: latest
-      cocoapods: default
-    scripts:
-      - name: Install Flutter dependencies
-        script: flutter pub get
-      - name: Build unsigned IPA
-        script: flutter build ipa --release --no-codesign
-    artifacts:
-      - build/ios/ipa/*.ipa
+ios-workflow:
+  name: Build unsigned iOS IPA
+  max_build_duration: 60
+  environment:
+    flutter: stable
+    xcode: latest
+    cocoapods: default
+  scripts:
+    - name: Flutter setup
+      script: |
+        flutter doctor
+        flutter pub get
+    - name: Install CocoaPods dependencies
+      script: |
+        cd ios
+        pod install
+        cd ..
+    - name: Build unsigned IPA
+      script: |
+        flutter build ipa --release --no-codesign
+  artifacts:
+    - build/ios/ipa/*.ipa
