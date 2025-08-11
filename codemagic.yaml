@@ -2,9 +2,9 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     environment:
-      flutter: latest
+      flutter: 3.19.6 # تحديد إصدار Flutter محدد
       xcode: latest
-      cocoapods: 1.11.2 # تحديد إصدار معين
+      cocoapods: 1.11.2
     scripts:
       - name: Update CocoaPods
         script: |
