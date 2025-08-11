@@ -14,7 +14,7 @@ workflows:
       - name: Fix CardTheme error in app_theme.dart
         script: |
           cd $CM_BUILD_DIR/flutter_app
-          sed -i 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
+          sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
 
       - name: Get Flutter dependencies
         script: |
