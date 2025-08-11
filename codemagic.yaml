@@ -8,6 +8,13 @@ workflows:
       - name: Install dependencies
         script: flutter pub get
 
+      - name: Fix Flutter theme API changes
+        script: |
+          # تعديل CardTheme
+          sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
+          # تعديل TabBarTheme
+          sed -i '' 's/TabBarTheme(/TabBarThemeData(/g' lib/theme/app_theme.dart
+
       - name: Build iOS app without code signing
         script: |
           flutter build ios --release --no-codesign
