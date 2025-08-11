@@ -8,13 +8,9 @@ workflows:
       - name: Install dependencies
         script: flutter pub get
 
-      - name: Fix Flutter theme API changes
-        script: |
-          sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
-          sed -i '' 's/TabBarTheme(/TabBarThemeData(/g' lib/theme/app_theme.dart
-
       - name: Build iOS app without code signing
-        script: flutter build ios --release --no-codesign
+        script: |
+          flutter build ios --release --no-codesign
 
       - name: Create IPA from .app
         script: |
@@ -22,25 +18,6 @@ workflows:
           cp -R build/ios/iphoneos/*.app Payload/
           zip -r app.ipa Payload
           rm -rf Payload
-
-      - name: Upload IPA to GitHub Release
-        script: |
-          GITHUB_REPO="Shad0wFlux/none56"
-          RELEASE_TAG="build-$(date +%Y%m%d%H%M%S)"
-          RELEASE_NAME="Build $RELEASE_TAG"
-          IPA_FILE="app.ipa"
-          GITHUB_TOKEN="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"
-
-          response=$(curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -d "{\"tag_name\":\"$RELEASE_TAG\", \"name\":\"$RELEASE_NAME\", \"body\":\"Automated build release.\", \"draft\":false, \"prerelease\":false}" \
-            "https://api.github.com/repos/$GITHUB_REPO/releases")
-
-          upload_url=$(echo $response | python3 -c "import sys, json; print(json.load(sys.stdin)['upload_url'].split('{')[0])")
-
-          curl -s -X POST -H "Authorization: token $GITHUB_TOKEN" \
-            -H "Content-Type: application/zip" \
-            --data-binary @"$IPA_FILE" \
-            "$upload_url?name=$IPA_FILE"
 
     artifacts:
       - app.ipa
