@@ -1,0 +1,31 @@
+workflows:
+  ios-workflow:
+    name: iOS Workflow
+    environment:
+      ios_version: latest
+      xcode_version: latest
+      flutter_version: latest
+    trigger:
+      events:
+        - push
+      branch_patterns:
+        - pattern: master
+          include: true
+    scripts:
+      - name: Install Flutter
+        script: | 
+          flutter pub get
+      - name: Build iOS App
+        script: | 
+          flutter build ios --release --no-codesign
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - build/ios/ipa/*.app.zip
+    publishing:
+      email:
+        recipients:
+          - your_email@example.com
+        notify: 
+          success: true
+          failure: true
+
