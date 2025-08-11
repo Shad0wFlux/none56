@@ -5,12 +5,6 @@ workflows:
       flutter: latest
       xcode: latest
       cocoapods: latest
-    trigger:
-      events:
-        - push
-      branch_patterns:
-        - pattern: master
-          include: true
     scripts:
       - name: Install Flutter
         script: | 
