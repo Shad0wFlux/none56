@@ -67,6 +67,5 @@ workflows:
       email:
         recipients:
           - you@example.com # استبدل هذا ببريدك الإلكتروني
-        success: true
-        failure: true
+
 
