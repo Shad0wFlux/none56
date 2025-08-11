@@ -2,9 +2,9 @@ workflows:
   ios-workflow:
     name: iOS Workflow
     environment:
-      ios_version: latest
-      xcode_version: latest
-      flutter_version: latest
+      flutter: latest
+      xcode: latest
+      cocoapods: latest
     trigger:
       events:
         - push
