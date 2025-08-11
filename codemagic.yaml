@@ -11,10 +11,10 @@ workflows:
         LANG: en_US.UTF-8
 
     scripts:
-      - name: Fix CardTheme error in app_theme.dart
+      - name: Fix Theme type errors in app_theme.dart
         script: |
           cd $CM_BUILD_DIR/flutter_app
-          sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
+          sed -i '' -e 's/CardTheme(/CardThemeData(/g' -e 's/TabBarTheme(/TabBarThemeData(/g' lib/theme/app_theme.dart
 
       - name: Get Flutter dependencies
         script: |
@@ -39,4 +39,4 @@ workflows:
     publishing:
       email:
         recipients:
-          - your-email@example.com
+          - your-email@example.comص
