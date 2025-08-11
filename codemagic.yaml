@@ -1,3 +1,6 @@
+# codemagic.yaml
+# هذا الملف يقوم ببناء تطبيق Flutter لنظام iOS وإنشاء ملف IPA غير موقّع.
+
 workflows:
   ios-unsigned-build:
     name: 'iOS Unsigned Build'
@@ -9,19 +12,20 @@ workflows:
       # استخدم أحدث إصدار من Xcode.
       xcode: latest
     scripts:
+      - name: Set working directory
+        script: |
+          cd Flutter
       - name: Get Flutter packages
         script: |
           flutter pub get
       - name: Install CocoaPods dependencies
         script: |
-          # انتقل إلى مجلد ios وقم بتثبيت الـ Pods.
           cd ios
           pod install
       - name: Build unsigned IPA
         script: |
-          # قم ببناء التطبيق في وضع الإصدار (release) وبدون توقيع رقمي.
           flutter build ipa --release --no-codesign
     artifacts:
       # حدد مسار ملف IPA الناتج ليكون متاحًا للتحميل.
-      - build/ios/ipa/*.ipa
+      - Flutter/build/ios/ipa/*.ipa
 
