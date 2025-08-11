@@ -14,6 +14,8 @@ workflows:
           sed -i '' 's/CardTheme(/CardThemeData(/g' lib/theme/app_theme.dart
           # تعديل TabBarTheme
           sed -i '' 's/TabBarTheme(/TabBarThemeData(/g' lib/theme/app_theme.dart
+          # تعديل DialogTheme
+          sed -i '' 's/DialogTheme(/DialogThemeData(/g' lib/theme/app_theme.dart
 
       - name: Build iOS app without code signing
         script: |
